@@ -1,6 +1,6 @@
 use actix_web::{App, HttpServer};
 
-use crate::routes::{done_item, post_item};
+use crate::routes::{done_item, get_all, post_item};
 use crate::persistence::todo_persistence::todo_persistence::init_db;
 
 mod dto;
@@ -18,6 +18,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(post_item)
             .service(done_item)
+            .service(get_all)
     })
         .bind(("127.0.0.1", 8080))?
         .run()

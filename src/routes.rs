@@ -1,7 +1,8 @@
-use actix_web::{HttpResponse, post, Responder, web};
+use actix_web::{get, HttpResponse, post, Responder, web};
 use serde::{Deserialize, Serialize};
+
 use crate::dto::item::item::Item;
-use crate::persistence::todo_persistence::todo_persistence::{complete_item, create_item};
+use crate::persistence::todo_persistence::todo_persistence::{complete_item, create_item, get_all_items};
 
 #[post("/item")]
 async fn post_item(req_body: web::Json<Item>) -> impl Responder {
@@ -27,7 +28,20 @@ async fn done_item(req_body: web::Json<CompleteItemRequest>) -> impl Responder {
     match complete_item(item_to_complete_id) {
         Ok(_) => HttpResponse::Ok().body("Completed"),
         Err(e) => {
-            println!("{}",e);
+            println!("{}", e);
+            HttpResponse::InternalServerError().body("Failed to complete item")
+        }
+    }
+}
+
+#[get("/item/all")]
+async fn get_all() -> impl Responder {
+    match get_all_items() {
+        Ok(items) => {
+            HttpResponse::Ok().json(items)
+        }
+        Err(e) => {
+            println!("{}", e);
             HttpResponse::InternalServerError().body("Failed to complete item")
         }
     }
@@ -35,5 +49,5 @@ async fn done_item(req_body: web::Json<CompleteItemRequest>) -> impl Responder {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct CompleteItemRequest {
-    item_id: String
+    item_id: String,
 }

@@ -24,6 +24,27 @@ pub mod todo_persistence {
         Ok(())
     }
 
+    pub fn get_all_items() -> Result<Vec<Item>> {
+        let connection = Connection::open("todo_rust.db")?;
+
+        let mut stmt = connection.prepare("SELECT id, done, description FROM item")?;
+
+        let item_iter = stmt.query_map([], |row| {
+            Ok(Item {
+                id: row.get(0)?,
+                done: row.get::<_, i64>(1)? != 0,
+                description: row.get(2)?,
+            })
+        })?;
+
+        let mut items = Vec::new();
+        for item in item_iter {
+            items.push(item?);
+        }
+
+        Ok(items)
+    }
+
     pub fn create_item(item_to_save: Item) -> Result<i64> {
         let connection = Connection::open("todo_rust.db")?;
 
